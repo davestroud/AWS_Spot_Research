@@ -6,3 +6,4 @@ with open('spot.json', 'r', encoding="utf-16") as f:
 json.loads(json_text)
 
 print(json_text)
+
