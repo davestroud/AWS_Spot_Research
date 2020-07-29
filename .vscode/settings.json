@@ -1,0 +1,17 @@
+{
+    "sqltools.connections": [
+        {
+            "askForPassword": true,
+            "database": "by_AZ_and_type",
+            "driver": "MySQL",
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "name": "AWS_spot",
+            "port": 3306,
+            "previewLimit": 50,
+            "server": "spot-prices.chaj45z3rtec.us-east-2.rds.amazonaws.com",
+            "username": "admin"
+        }
+    ]
+}
