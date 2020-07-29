@@ -5,12 +5,11 @@ import sqlalchemy
 
 
 # Load the sql connection file
-sql_url = json.load(open("sql_connection.json", "r"))['spot_db']
+sql_url = json.load(open("sql_connection.json", "r"))["spot_db"]
 # Connect to the db
-db = sqlalchemy.create_engine(
-    sql_url,
-    echo=False,
-).connect()
+db = sqlalchemy.create_engine(sql_url, echo=False,).connect()
+
+tables = sqlalchemy.inspect(db).get_table_names()
 
 # For each region below:
 for region in ["us-east-1", "us-east-2", "us-west-1", "us-west-2"]:
@@ -34,6 +33,18 @@ for region in ["us-east-1", "us-east-2", "us-west-1", "us-west-2"]:
             temp = temp_df_region[temp_df_region["InstanceType"] == instance_type]
             # Drop the redundant cols
             temp = temp.drop(columns=["AvailabilityZone", "InstanceType"])
+
+            table_exists = f"{region}_{instance_type}" in tables
+            # If the table already exists
+            if table_exists:
+                # Get the unique timestamps from the table
+                existing_times = pd.read_sql_query(
+                    f"SELECT DISTINCT(Timestamp) FROM `{region}_{instance_type}`;",
+                    con=db,
+                )
+
+                # Drop rows from the temp frame that are already in temp_already_existing
+                temp = temp[~temp["Timestamp"].isin(existing_times["Timestamp"])]
             # Dump it in mysql, with region_instance type as the table name. E.G.- us-east-1a_a1.large
             temp.to_sql(
                 f"{region}_{instance_type}",
@@ -48,9 +59,10 @@ for region in ["us-east-1", "us-east-2", "us-west-1", "us-west-2"]:
             )
 
             # Create a primary key, of the pair of description (OS type) and timestamp
-            db.execute(
-                f"ALTER TABLE `{region}_{instance_type}` ADD CONSTRAINT pk PRIMARY KEY (Timestamp, ProductDescription)"
-            )
+            if table_exists:
+                db.execute(
+                    f"ALTER TABLE `{region}_{instance_type}` ADD CONSTRAINT pk PRIMARY KEY (Timestamp, ProductDescription)"
+                )
 
             print(f"Wrote {region}_{instance_type}")
 
