@@ -39,7 +39,7 @@ for region in ["us-east-1", "us-east-2", "us-west-1", "us-west-2"]:
                 f"{region}_{instance_type}",
                 con=db,
                 index=False,
-                if_exists="replace",
+                if_exists="append",
                 dtype={
                     "ProductDescription": sqlalchemy.types.VARCHAR(length=32),
                     "SpotPrice": sqlalchemy.types.Float(),
