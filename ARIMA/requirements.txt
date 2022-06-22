@@ -1,5 +1,5 @@
 ## data
-numpy==1.16.4
+numpy==1.22.0
 pandas==0.25.1
 xlrd==1.2.0
 ## plot
